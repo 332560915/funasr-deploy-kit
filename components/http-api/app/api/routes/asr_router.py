@@ -40,7 +40,8 @@ async def recognize(request: Request, file: UploadFile = File(...)):
         if total_size == 0:
             raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-        result = await request.app.state.asr_client.recognize_file(tmp_path)
+        async with request.app.state.asr_semaphore:
+            result = await request.app.state.asr_client.recognize_file(tmp_path)
         return ASRResponse(code=0, text=result["text"])
     except FunASRRecognitionError as exc:
         logger.opt(exception=exc).error("ASR processing failed")

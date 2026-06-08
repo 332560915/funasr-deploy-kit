@@ -53,13 +53,13 @@ expired
 
 ## 并发控制
 
-FunASR offline 识别通常比较耗资源。下一版本建议限制后台识别并发：
+FunASR offline 识别通常比较耗资源。下一版本的后台任务也应继续限制识别并发：
 
 ```text
-ASR_WORKER_CONCURRENCY=1
+ASR_RECOGNITION_CONCURRENCY=10
 ```
 
-后续可根据机器资源调整为 2 或更高。
+后续可根据机器资源和 FunASR Server 承载能力调整。
 
 ## 清理策略
 

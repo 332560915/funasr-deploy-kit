@@ -53,3 +53,14 @@ HTTP API 通过 `MAX_UPLOAD_SIZE` 控制同步接口上传大小。默认样例�
 ```text
 deploy/config/http-api.env
 ```
+
+## 并发请求较多时响应变慢
+
+可以根据机器资源和 FunASR Server 承载能力调整：
+
+```env
+HTTP_API_LIMIT_CONCURRENCY=20
+ASR_RECOGNITION_CONCURRENCY=10
+```
+
+`HTTP_API_LIMIT_CONCURRENCY` 控制 HTTP 入口并发，`ASR_RECOGNITION_CONCURRENCY` 控制真正进入 FunASR 识别的业务并发。

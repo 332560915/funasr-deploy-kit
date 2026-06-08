@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     reload: bool = False
+    http_api_workers: int = 1
+    http_api_limit_concurrency: int = 20
+    http_api_limit_max_requests: int = 1000
+    http_api_backlog: int = 256
     timeout_keep_alive: int = 360
     request_timeout: float = 360.0
 
@@ -40,6 +44,7 @@ class Settings(BaseSettings):
     funasr_final_timeout: float = 30.0
     funasr_close_grace_seconds: float = 0.5
     funasr_max_message_size: int = 10 * 1024 * 1024
+    asr_recognition_concurrency: int = 10
 
     max_upload_size: int = 100 * 1024 * 1024
     upload_temp_dir: str = "/tmp"

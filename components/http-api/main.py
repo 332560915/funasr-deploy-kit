@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import asyncio
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
     setup_logging()
     logger.info("Application startup: initializing FunASR client")
     app.state.asr_client = FunASROfflineClient(settings)
+    app.state.asr_semaphore = asyncio.Semaphore(settings.asr_recognition_concurrency)
     try:
         yield
     finally:
@@ -94,4 +96,8 @@ if __name__ == "__main__":
         reload=settings.reload,
         log_level=settings.log_level.lower(),
         timeout_keep_alive=settings.timeout_keep_alive,
+        workers=settings.http_api_workers,
+        limit_concurrency=settings.http_api_limit_concurrency,
+        limit_max_requests=settings.http_api_limit_max_requests,
+        backlog=settings.http_api_backlog,
     )
