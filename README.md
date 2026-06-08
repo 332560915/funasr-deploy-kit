@@ -1,17 +1,19 @@
-# FunASR 语音识别平台
+# funasr-deploy-kit
 
-本仓库交付一套本地化语音识别平台：使用容器运行 FunASR websocket 服务，并提供文件上传式 HTTP API。调用方可以直接上传音频或视频文件，平台返回完整识别文本。
+[English](README.en.md)
+
+`funasr-deploy-kit` 是一个面向 FunASR 服务化部署的 Docker 工程，提供 FunASR websocket 服务封装、HTTP 文件识别 API、配置与热词挂载、离线打包迁移、启动更新脚本和中文部署文档，适用于内网或无公网环境中的语音转文字服务交付。
 
 ## 支持场景
 
 - 文件上传式语音转文字，默认同步接口为 `POST /api/v1/asr`，适合短音频和功能验证。
-- HTTP API 内置 Swagger 文档，便于浏览器测试和联调。
+- HTTP API 内置 Swagger 文档，可通过 `/docs` 在浏览器中测试和联调。
 - FunASR offline websocket 服务容器化部署。
 - 模型、热词、配置、日志和临时文件目录外置挂载。
 - 在线环境构建镜像，离线环境导入镜像并启动。
-- 未来可扩展独立的 websocket-gateway 组件。
+- 后续可扩展独立 websocket 转发组件或异步任务识别接口。
 
-## 平台组成
+## 工程结构
 
 ```text
 .
@@ -21,24 +23,23 @@
 |-- deploy/                 Compose 文件和部署配置样例
 |-- scripts/                构建、打包和离线加载脚本
 `-- docs/
-    |-- usage/              使用入口和 API
-    |-- deployment/         构建、部署和离线迁移
-    |-- operations/         更新维护和排障
-    `-- reference/          背景说明和参考材料
+    |-- zh/                 中文文档
+    `-- en/                 English documentation
 ```
 
-## 文档入口
+## 中文文档
 
-- [快速开始](docs/usage/getting-started.md)
-- [HTTP API 调用](docs/usage/api.md)
-- [配置说明](docs/deployment/configuration.md)
-- [构建镜像](docs/deployment/build.md)
-- [启动部署](docs/deployment/deploy.md)
-- [更新维护](docs/operations/update.md)
-- [离线打包](docs/deployment/offline-package.md)
-- [离线部署](docs/deployment/offline-deploy.md)
-- [常见问题](docs/operations/troubleshooting.md)
-- [FunASR final 消息说明](docs/reference/funasr-is-final.md)
+- [快速开始](docs/zh/usage/getting-started.md)
+- [HTTP API 调用](docs/zh/usage/api.md)
+- [配置说明](docs/zh/deployment/configuration.md)
+- [构建镜像](docs/zh/deployment/build.md)
+- [启动部署](docs/zh/deployment/deploy.md)
+- [更新维护](docs/zh/operations/update.md)
+- [离线打包](docs/zh/deployment/offline-package.md)
+- [离线部署](docs/zh/deployment/offline-deploy.md)
+- [常见问题](docs/zh/operations/troubleshooting.md)
+- [FunASR final 消息说明](docs/zh/reference/funasr-is-final.md)
+- [下一版本规划](docs/zh/reference/next-version-plan.md)
 - [版本变更记录](CHANGELOG.md)
 
 ## 组件入口

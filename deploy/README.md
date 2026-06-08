@@ -26,8 +26,8 @@ deploy/tmp/http-api/           HTTP API 临时上传目录
 
 ## 相关文档
 
-- [快速开始](../docs/usage/getting-started.md)
-- [配置说明](../docs/deployment/configuration.md)
-- [启动部署](../docs/deployment/deploy.md)
-- [更新维护](../docs/operations/update.md)
-- [离线部署](../docs/deployment/offline-deploy.md)
+- [快速开始](../docs/zh/usage/getting-started.md)
+- [配置说明](../docs/zh/deployment/configuration.md)
+- [启动部署](../docs/zh/deployment/deploy.md)
+- [更新维护](../docs/zh/operations/update.md)
+- [离线部署](../docs/zh/deployment/offline-deploy.md)

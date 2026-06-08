@@ -22,6 +22,6 @@ bash scripts/load-offline.sh /data
 
 ## 相关文档
 
-- [构建镜像](../docs/deployment/build.md)
-- [离线打包](../docs/deployment/offline-package.md)
-- [离线部署](../docs/deployment/offline-deploy.md)
+- [构建镜像](../docs/zh/deployment/build.md)
+- [离线打包](../docs/zh/deployment/offline-package.md)
+- [离线部署](../docs/zh/deployment/offline-deploy.md)

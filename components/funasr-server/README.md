@@ -17,7 +17,7 @@ local/funasr-runtime-sdk-cpu:0.4.7-is-final
 
 ## 相关文档
 
-- [构建镜像](../../docs/deployment/build.md)
-- [配置说明](../../docs/deployment/configuration.md)
-- [FunASR final 消息说明](../../docs/reference/funasr-is-final.md)
-- [常见问题](../../docs/operations/troubleshooting.md)
+- [构建镜像](../../docs/zh/deployment/build.md)
+- [配置说明](../../docs/zh/deployment/configuration.md)
+- [FunASR final 消息说明](../../docs/zh/reference/funasr-is-final.md)
+- [常见问题](../../docs/zh/operations/troubleshooting.md)
