@@ -1,0 +1,37 @@
+# IDE / editor files
+.idea/
+.vscode/
+
+# Python-generated files
+__pycache__/
+**/__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+components/http-api/.venv/
+
+# Local runtime files
+.env
+*.log
+logs/
+tmp/
+deploy/config/http-api.env
+deploy/logs/
+deploy/models/
+deploy/tmp/
+
+# Offline/package artifacts
+dist/
+*.tar
+*.tgz
+*.tar.gz

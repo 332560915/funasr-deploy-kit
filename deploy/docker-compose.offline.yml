@@ -1,0 +1,36 @@
+services:
+  funasr-server:
+    image: local/funasr-runtime-sdk-cpu:0.4.7-is-final
+    container_name: funasr-server
+    restart: unless-stopped
+    ports:
+      - "10095:10095"
+    volumes:
+      - ./models:/workspace/models
+      - ./config:/workspace/config
+      - ./logs/funasr-server:/workspace/logs
+    working_dir: /workspace/FunASR/runtime/websocket/build/bin
+    command: ["bash", "/workspace/config/start-funasr.sh"]
+    networks:
+      - asr-net
+
+  http-api:
+    image: local/http-api:latest
+    container_name: http-api
+    restart: unless-stopped
+    depends_on:
+      - funasr-server
+    ports:
+      - "18000:8000"
+    env_file:
+      - ./config/http-api.env
+    volumes:
+      - ./config/http-api.env:/app/.env:ro
+      - ./logs/http-api:/app/logs
+      - ./tmp/http-api:/app/tmp
+    networks:
+      - asr-net
+
+networks:
+  asr-net:
+    driver: bridge
