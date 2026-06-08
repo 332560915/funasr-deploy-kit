@@ -18,7 +18,7 @@ if [ ! -f "${ENV_FILE}" ]; then
 fi
 
 MODELS_DIR="${REPO_ROOT}/deploy/models"
-if [ ! -d "${MODELS_DIR}" ] || [ -z "$(find "${MODELS_DIR}" -mindepth 1 -print -quit)" ]; then
+if [ ! -d "${MODELS_DIR}" ] || [ -z "$(find -L "${MODELS_DIR}" -mindepth 1 -print -quit)" ]; then
   echo "Missing deploy/models or it is empty" >&2
   echo "Copy FunASR model files into deploy/models before packaging an offline bundle." >&2
   exit 1
@@ -31,6 +31,7 @@ docker save -o "${OUTPUT_DIR}/funasr-images.tar" \
   local/http-api:latest
 
 tar \
+  --dereference \
   --exclude='./logs/*' \
   --exclude='./tmp/*' \
   --exclude='./models/.cache/*' \
