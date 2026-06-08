@@ -51,7 +51,74 @@ LOG_FILE=/app/logs/http-api.log
 
 ## FunASR Server 配置
 
-FunASR Server 通过 `deploy/config/start-funasr.sh` 启动。该脚本中配置模型路径、热词路径、线程数和端口。
+FunASR Server 通过 `deploy/config/start-funasr.sh` 启动。该脚本借鉴官方 `runtime/run_server.sh` 的参数组织方式，但使用 `exec` 前台运行，适合 Docker 容器生命周期管理。
+
+脚本支持三种配置方式：
+
+- 修改 `deploy/config/start-funasr.sh` 中的默认变量。
+- 通过环境变量覆盖默认值。
+- 通过官方 `parse_options.sh` 风格的启动参数覆盖，例如 `--port 10096 --model-dir damo/xxx`。
+
+默认模型：
+
+```text
+ASR  主模型：damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
+VAD  模型：  damo/speech_fsmn_vad_zh-cn-16k-common-onnx
+PUNC 标点：  damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
+ITN  模型：  thuduj12/fst_itn_zh
+LM   语言模型：damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+```
+
+模型配置位于 `deploy/config/start-funasr.sh`：
+
+```bash
+download_model_dir="${FUNASR_DOWNLOAD_MODEL_DIR:-/workspace/models}"
+model_dir="${FUNASR_ASR_MODEL:-damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
+vad_dir="${FUNASR_VAD_MODEL:-damo/speech_fsmn_vad_zh-cn-16k-common-onnx}"
+punc_dir="${FUNASR_PUNC_MODEL:-damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx}"
+itn_dir="${FUNASR_ITN_MODEL:-thuduj12/fst_itn_zh}"
+lm_dir="${FUNASR_LM_MODEL:-damo/speech_ngram_lm_zh-cn-ai-wesp-fst}"
+```
+
+模型值可以是 ModelScope 模型 ID，也可以是容器内本地模型路径。例如离线环境固定本地模型时，可以改为：
+
+```bash
+model_dir="${FUNASR_ASR_MODEL:-/workspace/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
+```
+
+模型下载和缓存目录固定为：
+
+```text
+/workspace/models
+```
+
+该目录由宿主机 `deploy/models` 挂载进入容器。
+
+线程相关参数默认按官方脚本逻辑自动计算：
+
+```text
+decoder_thread_num = CPU 核数
+io_thread_num      = ceil(decoder_thread_num / 16)
+model_thread_num   = 1
+```
+
+如需固定线程数，可以通过环境变量覆盖：
+
+```bash
+FUNASR_DECODER_THREAD_NUM=28
+FUNASR_IO_THREAD_NUM=2
+FUNASR_MODEL_THREAD_NUM=1
+```
+
+SSL 配置与官方脚本保持一致：`FUNASR_CERTFILE` 为空或 `0` 时关闭 SSL，同时 `FUNASR_KEYFILE` 也会置空。
+
+启动时会生成：
+
+```text
+/workspace/.config/server_config
+```
+
+该文件用于记录实际启动参数，便于排查运行配置。
 
 热词文件：
 

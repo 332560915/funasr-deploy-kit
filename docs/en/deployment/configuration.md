@@ -51,7 +51,74 @@ Common settings:
 
 ## FunASR Server Configuration
 
-FunASR Server is started by `deploy/config/start-funasr.sh`. The script configures model paths, hotword paths, thread count, and port.
+FunASR Server is started by `deploy/config/start-funasr.sh`. The script follows the parameter style of the official `runtime/run_server.sh`, but uses foreground `exec` so it works better as the main Docker container process.
+
+The script supports three configuration methods:
+
+- Change default variables in `deploy/config/start-funasr.sh`.
+- Override defaults with environment variables.
+- Override values with official `parse_options.sh`-style startup arguments, such as `--port 10096 --model-dir damo/xxx`.
+
+Default models:
+
+```text
+ASR  model:          damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
+VAD  model:          damo/speech_fsmn_vad_zh-cn-16k-common-onnx
+PUNC model:          damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
+ITN  model:          thuduj12/fst_itn_zh
+LM   language model: damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+```
+
+Model settings are in `deploy/config/start-funasr.sh`:
+
+```bash
+download_model_dir="${FUNASR_DOWNLOAD_MODEL_DIR:-/workspace/models}"
+model_dir="${FUNASR_ASR_MODEL:-damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
+vad_dir="${FUNASR_VAD_MODEL:-damo/speech_fsmn_vad_zh-cn-16k-common-onnx}"
+punc_dir="${FUNASR_PUNC_MODEL:-damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx}"
+itn_dir="${FUNASR_ITN_MODEL:-thuduj12/fst_itn_zh}"
+lm_dir="${FUNASR_LM_MODEL:-damo/speech_ngram_lm_zh-cn-ai-wesp-fst}"
+```
+
+Each model value can be a ModelScope model ID or a local model path inside the container. For example, to pin a local model path in an offline environment:
+
+```bash
+model_dir="${FUNASR_ASR_MODEL:-/workspace/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
+```
+
+Model download and cache directory:
+
+```text
+/workspace/models
+```
+
+This directory is mounted from host directory `deploy/models`.
+
+Thread parameters follow the official script's automatic calculation by default:
+
+```text
+decoder_thread_num = CPU core count
+io_thread_num      = ceil(decoder_thread_num / 16)
+model_thread_num   = 1
+```
+
+To pin thread values, override them with environment variables:
+
+```bash
+FUNASR_DECODER_THREAD_NUM=28
+FUNASR_IO_THREAD_NUM=2
+FUNASR_MODEL_THREAD_NUM=1
+```
+
+SSL behavior matches the official script: when `FUNASR_CERTFILE` is empty or `0`, SSL is disabled and `FUNASR_KEYFILE` is cleared as well.
+
+The startup script writes the effective server arguments to:
+
+```text
+/workspace/.config/server_config
+```
+
+This file is useful when troubleshooting runtime configuration.
 
 Hotword file:
 
