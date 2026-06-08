@@ -4,7 +4,7 @@
 
 ## 支持场景
 
-- 文件上传式语音转文字，默认接口为 `POST /api/v1/asr`。
+- 文件上传式语音转文字，默认同步接口为 `POST /api/v1/asr`，适合短音频和功能验证。
 - HTTP API 内置 Swagger 文档，便于浏览器测试和联调。
 - FunASR offline websocket 服务容器化部署。
 - 模型、热词、配置、日志和临时文件目录外置挂载。

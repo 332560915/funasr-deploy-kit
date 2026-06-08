@@ -44,4 +44,6 @@ curl http://127.0.0.1:18000/health
 curl -F "file=@/path/to/audio-or-video.mp4" http://127.0.0.1:18000/api/v1/asr
 ```
 
+建议使用短音频或小文件完成快速验证。同步接口默认上传上限为 30MB。
+
 更多部署操作见 [启动部署](../deployment/deploy.md)。

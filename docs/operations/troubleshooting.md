@@ -46,7 +46,7 @@ docker compose -f docker-compose.offline.yml up -d
 
 ## 上传文件过大
 
-HTTP API 通过 `MAX_UPLOAD_SIZE` 控制上传大小。超过限制会返回 `413`。
+HTTP API 通过 `MAX_UPLOAD_SIZE` 控制同步接口上传大小。默认样例为 30MB，超过限制会返回 `413`。
 
 配置位置：
 

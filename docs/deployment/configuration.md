@@ -22,7 +22,7 @@ FUNASR_WS_URL=ws://funasr-server:10095
 FUNASR_MODE=offline
 FUNASR_FINAL_TIMEOUT=120
 REQUEST_TIMEOUT=360
-MAX_UPLOAD_SIZE=524288000
+MAX_UPLOAD_SIZE=31457280
 UPLOAD_TEMP_DIR=/app/tmp
 LOG_FILE=/app/logs/http-api.log
 ```
@@ -33,7 +33,7 @@ LOG_FILE=/app/logs/http-api.log
 - `FUNASR_MODE`: 当前面向文件转写，默认使用 `offline`。
 - `FUNASR_FINAL_TIMEOUT`: 等待 FunASR final 结果的超时时间。
 - `REQUEST_TIMEOUT`: HTTP 请求整体超时时间。
-- `MAX_UPLOAD_SIZE`: 上传文件大小上限，单位为字节。
+- `MAX_UPLOAD_SIZE`: 同步识别接口上传文件大小上限，单位为字节。默认样例为 30MB。
 - `UPLOAD_TEMP_DIR`: 容器内上传临时目录。
 - `LOG_FILE`: 容器内日志文件路径。
 
@@ -46,6 +46,14 @@ FunASR Server 通过 `deploy/config/start-funasr.sh` 启动。该脚本中配置
 ```text
 deploy/config/hotwords.txt
 ```
+
+带中文注释的热词样例：
+
+```text
+deploy/config/hotwords.example.txt
+```
+
+`hotwords.txt` 建议只保留实际热词数据行，避免 FunASR 热词解析器不支持注释。
 
 模型目录挂载到容器内：
 

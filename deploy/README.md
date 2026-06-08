@@ -11,6 +11,7 @@ deploy/
 `-- config/
     |-- http-api.env.example    HTTP API 配置样例
     |-- hotwords.txt            热词文件
+    |-- hotwords.example.txt    带中文注释的热词样例
     `-- start-funasr.sh         FunASR Server 启动脚本
 ```
 
