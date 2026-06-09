@@ -1,83 +1,84 @@
-# Deploy
+# Online Deployment
 
-This document describes how to start the platform in an online environment or in an environment where images already exist.
-
-## Prepare Directories
-
-Recommended deployment directory:
+This document is for formal online deployment. Corresponding script:
 
 ```text
-/data/funasr
-|-- docker-compose.yml
-|-- docker-compose.offline.yml
-|-- config/
-|-- logs/
-|-- models/
-`-- tmp/
+scripts/deploy-online.sh
 ```
 
-When starting locally inside the repository, use the `deploy/` directory directly.
+## When to Use
 
-## Prepare Configuration and Models
+- The target machine can build images online, or required images already exist locally.
+- You need an independent runtime directory such as `/data/funasr`.
+- Services should later be managed from the runtime directory.
+
+## Deploy
+
+By default, the script builds images, creates the runtime directory, and starts services:
 
 ```bash
-cp deploy/config/http-api.env.example deploy/config/http-api.env
+bash scripts/deploy-online.sh /data/funasr
 ```
 
-Put FunASR model files under:
+If images already exist, skip the build step:
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --no-build
+```
+
+`--no-build` checks whether required images exist locally. Missing images fail early.
+
+Create the runtime directory without starting services:
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --no-start
+```
+
+Skip confirmation:
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --yes
+```
+
+## Existing Runtime Directory
+
+If the target directory already exists, the script tries to stop old services and backs up the old directory:
 
 ```text
-deploy/models
+/data/funasr.bak-YYYYMMDDHHMMSS
 ```
 
-## Start Services
+This avoids mixing old and new runtime files.
 
-Build and start online:
+## Port Check
 
-```bash
-docker compose -f deploy/docker-compose.yml up -d --build
+After old services are stopped and before new services start, the script checks:
+
+```text
+FUNASR_HOST_PORT
+HTTP_API_PORT
 ```
 
-Start when images already exist:
+Default ports:
 
-```bash
-docker compose -f deploy/docker-compose.yml up -d
+```text
+10095
+18000
 ```
 
-Start in an offline environment:
+If a port is occupied by another service, change `/data/funasr/.env` or stop that service.
+
+## Manage Services
+
+Manage services from the runtime directory:
 
 ```bash
-docker compose -f docker-compose.offline.yml up -d
-```
-
-## Check Status
-
-```bash
-docker compose -f deploy/docker-compose.yml ps
-```
-
-Inside `/data/funasr`:
-
-```bash
+cd /data/funasr
 docker compose ps
+docker compose up -d
+docker compose logs -f http-api
+docker compose logs -f funasr-server
+docker compose down
 ```
 
-## View Logs
-
-```bash
-docker compose -f deploy/docker-compose.yml logs -f http-api
-docker compose -f deploy/docker-compose.yml logs -f funasr-server
-```
-
-Host log directories:
-
-```text
-deploy/logs/http-api
-deploy/logs/funasr-server
-```
-
-## Stop Services
-
-```bash
-docker compose -f deploy/docker-compose.yml down
-```
+The runtime `README.md` also contains common commands and documentation links.

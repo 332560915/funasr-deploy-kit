@@ -2,28 +2,46 @@
 
 The HTTP API component provides file-based speech recognition. Callers can upload audio or video files directly without preprocessing them.
 
-The current synchronous transcription API is suitable for short audio, functional verification, and Swagger-based testing.
+The current API is synchronous and is suitable for short audio, functional verification, and Swagger-based testing.
 
-## Swagger UI
+## Swagger
 
-After the service starts, open the built-in Swagger UI in a browser:
+After services start, open:
 
 ```text
 http://127.0.0.1:18000/docs
 ```
 
-If the service is deployed on a server, replace the host with the server IP:
+If deployed on a server, replace the host with the server IP:
 
 ```text
 http://10.2.3.118:18000/docs
 ```
 
-Choose `/api/v1/asr` in Swagger, upload a file, and test the transcription result. Swagger is best used with short audio or small files.
+## Health Check
 
-## Transcription API
+```bash
+curl http://127.0.0.1:18000/health
+```
+
+Example response:
+
+```json
+{
+  "status": "healthy"
+}
+```
+
+## Recognition API
 
 ```text
 POST /api/v1/asr
+```
+
+Request field:
+
+```text
+file  Audio or video file
 ```
 
 Example:
@@ -41,30 +59,32 @@ Example response:
 }
 ```
 
-## Health Check
-
-```bash
-curl http://127.0.0.1:18000/health
-```
-
-Response:
-
-```json
-{
-  "status": "healthy"
-}
-```
-
 ## Service Info
 
 ```bash
 curl http://127.0.0.1:18000/
 ```
 
-This endpoint returns the service name, version, and main endpoints.
+This endpoint returns service name, version, and main endpoints.
 
 ## Upload Limit
 
-The upload size is controlled by `MAX_UPLOAD_SIZE`. The default sample value is `31457280`, which is 30MB. The HTTP API writes uploaded files in chunks and returns `413` when the limit is exceeded.
+Upload size is controlled by `MAX_UPLOAD_SIZE`. Default:
 
-`POST /api/v1/asr` is synchronous. The request waits for upload, forwarding to FunASR, recognition, and response delivery.
+```env
+MAX_UPLOAD_SIZE=31457280
+```
+
+This is 30MB. Requests exceeding the limit return `413`.
+
+Configuration file:
+
+```text
+/data/funasr/runtime/config/http-api.env
+```
+
+Apply changes:
+
+```bash
+bash scripts/update.sh config /data/funasr
+```

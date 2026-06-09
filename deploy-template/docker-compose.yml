@@ -1,0 +1,48 @@
+services:
+  funasr-server:
+    image: ${FUNASR_SERVER_IMAGE:-local/funasr-runtime-sdk-cpu:0.4.7-is-final}
+    container_name: funasr-server
+    restart: unless-stopped
+    ports:
+      - "${FUNASR_HOST_PORT:-10095}:${FUNASR_SERVER_PORT:-10095}"
+    environment:
+      FUNASR_DOWNLOAD_MODEL_DIR: ${FUNASR_DOWNLOAD_MODEL_DIR:-/workspace/models}
+      FUNASR_ASR_MODEL: ${FUNASR_ASR_MODEL:-damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}
+      FUNASR_VAD_MODEL: ${FUNASR_VAD_MODEL:-damo/speech_fsmn_vad_zh-cn-16k-common-onnx}
+      FUNASR_PUNC_MODEL: ${FUNASR_PUNC_MODEL:-damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx}
+      FUNASR_ITN_MODEL: ${FUNASR_ITN_MODEL:-thuduj12/fst_itn_zh}
+      FUNASR_LM_MODEL: ${FUNASR_LM_MODEL:-damo/speech_ngram_lm_zh-cn-ai-wesp-fst}
+      FUNASR_PORT: ${FUNASR_SERVER_PORT:-10095}
+      FUNASR_DECODER_THREAD_NUM: ${FUNASR_DECODER_THREAD_NUM:-}
+      FUNASR_MODEL_THREAD_NUM: ${FUNASR_MODEL_THREAD_NUM:-1}
+      FUNASR_IO_THREAD_NUM: ${FUNASR_IO_THREAD_NUM:-}
+      FUNASR_CERTFILE: ${FUNASR_CERTFILE:-}
+      FUNASR_KEYFILE: ${FUNASR_KEYFILE:-}
+      FUNASR_HOTWORD: ${FUNASR_HOTWORD:-/workspace/config/hotwords.txt}
+    volumes:
+      - ${FUNASR_MODELS_DIR:-./runtime/models}:/workspace/models
+      - ${FUNASR_CONFIG_DIR:-./runtime/config}:/workspace/config
+      - ${FUNASR_LOGS_DIR:-./runtime/logs}/funasr-server:/workspace/logs
+    networks:
+      - asr-net
+
+  http-api:
+    image: ${HTTP_API_IMAGE:-local/http-api:latest}
+    container_name: funasr-http-api
+    restart: unless-stopped
+    depends_on:
+      - funasr-server
+    ports:
+      - "${HTTP_API_PORT:-18000}:8000"
+    env_file:
+      - ${HTTP_API_ENV_FILE:-./runtime/config/http-api.env}
+    volumes:
+      - ${HTTP_API_ENV_FILE:-./runtime/config/http-api.env}:/app/.env:ro
+      - ${HTTP_API_LOGS_DIR:-./runtime/logs}/http-api:/app/logs
+      - ${HTTP_API_TMP_DIR:-./runtime/tmp}/http-api:/app/tmp
+    networks:
+      - asr-net
+
+networks:
+  asr-net:
+    driver: bridge

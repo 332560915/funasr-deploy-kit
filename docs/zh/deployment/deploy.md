@@ -1,83 +1,84 @@
-# 启动部署
+# 在线部署
 
-本文说明在线环境或已经具备镜像的环境中如何启动平台。
-
-## 准备目录
-
-部署目录建议为：
+本文面向正式在线部署场景，对应脚本：
 
 ```text
-/data/funasr
-|-- docker-compose.yml
-|-- docker-compose.offline.yml
-|-- config/
-|-- logs/
-|-- models/
-`-- tmp/
+scripts/deploy-online.sh
 ```
 
-在仓库内本地启动时，直接使用 `deploy/` 目录即可。
+## 适用场景
 
-## 准备配置和模型
+- 目标机器可以联网构建镜像，或本机已经具备所需镜像。
+- 需要生成独立运行目录，例如 `/data/funasr`。
+- 需要后续通过运行目录中的 `docker-compose.yml` 管理服务。
+
+## 执行部署
+
+默认会构建镜像、生成运行目录并启动服务：
 
 ```bash
-cp deploy/config/http-api.env.example deploy/config/http-api.env
+bash scripts/deploy-online.sh /data/funasr
 ```
 
-把 FunASR 模型文件放到：
+如果镜像已经存在，可以跳过构建：
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --no-build
+```
+
+`--no-build` 会检查本机 Docker 是否已有配置中声明的镜像。缺少镜像时会提前报错。
+
+如果只想生成运行目录，不立即启动服务：
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --no-start
+```
+
+自动确认安装：
+
+```bash
+bash scripts/deploy-online.sh /data/funasr --yes
+```
+
+## 已有目录处理
+
+如果目标目录已存在，脚本会先尝试停止旧服务，再备份旧目录：
 
 ```text
-deploy/models
+/data/funasr.bak-YYYYMMDDHHMMSS
 ```
 
-## 启动服务
+这样可以避免新旧配置混在同一个运行目录里。
 
-在线构建并启动：
+## 端口检查
 
-```bash
-docker compose -f deploy/docker-compose.yml up -d --build
+脚本会在旧服务停止之后、启动新服务之前检查端口：
+
+```text
+FUNASR_HOST_PORT
+HTTP_API_PORT
 ```
 
-镜像已存在时启动：
+默认端口：
 
-```bash
-docker compose -f deploy/docker-compose.yml up -d
+```text
+10095
+18000
 ```
 
-离线环境启动：
+如果端口被其他服务占用，脚本会提示修改 `/data/funasr/.env` 或停止占用端口的服务。
+
+## 服务管理
+
+进入运行目录后管理服务：
 
 ```bash
-docker compose -f docker-compose.offline.yml up -d
-```
-
-## 查看状态
-
-```bash
-docker compose -f deploy/docker-compose.yml ps
-```
-
-在 `/data/funasr` 部署目录中：
-
-```bash
+cd /data/funasr
 docker compose ps
+docker compose up -d
+docker compose logs -f http-api
+docker compose logs -f funasr-server
+docker compose down
 ```
 
-## 查看日志
-
-```bash
-docker compose -f deploy/docker-compose.yml logs -f http-api
-docker compose -f deploy/docker-compose.yml logs -f funasr-server
-```
-
-宿主机日志目录：
-
-```text
-deploy/logs/http-api
-deploy/logs/funasr-server
-```
-
-## 停止服务
-
-```bash
-docker compose -f deploy/docker-compose.yml down
-```
+运行目录中的 `README.md` 也会提供常用命令和文档入口。

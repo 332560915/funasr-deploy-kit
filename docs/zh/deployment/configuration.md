@@ -1,16 +1,56 @@
 # 配置说明
 
-配置分为两类：
+安装完成后，日常配置应修改运行目录中的文件，而不是修改 `deploy-template/`。
 
-- HTTP API 配置：`deploy/config/http-api.env`
-- FunASR Server 启动配置：`deploy/config/start-funasr.sh`
+## 配置分类
+
+```text
+/data/funasr/.env                         Compose 运行配置
+/data/funasr/runtime/config/http-api.env  HTTP API 配置
+/data/funasr/runtime/config/hotwords.txt  热词运行文件
+```
+
+## Compose 运行配置
+
+文件位置：
+
+```text
+/data/funasr/.env
+```
+
+常用配置：
+
+```env
+FUNASR_SERVER_IMAGE=local/funasr-runtime-sdk-cpu:0.4.7-is-final
+HTTP_API_IMAGE=local/http-api:latest
+
+FUNASR_HOST_PORT=10095
+FUNASR_SERVER_PORT=10095
+HTTP_API_PORT=18000
+
+FUNASR_DOWNLOAD_MODEL_DIR=/workspace/models
+FUNASR_ASR_MODEL=damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
+FUNASR_VAD_MODEL=damo/speech_fsmn_vad_zh-cn-16k-common-onnx
+FUNASR_PUNC_MODEL=damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
+FUNASR_ITN_MODEL=thuduj12/fst_itn_zh
+FUNASR_LM_MODEL=damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+FUNASR_HOTWORD=/workspace/config/hotwords.txt
+```
+
+说明：
+
+- `FUNASR_SERVER_IMAGE`、`HTTP_API_IMAGE`: 运行镜像名称。
+- `FUNASR_HOST_PORT`: FunASR Server 暴露到宿主机的端口。
+- `HTTP_API_PORT`: HTTP API 暴露到宿主机的端口。
+- `FUNASR_*_MODEL`: 模型 ID 或容器内模型路径。
+- `FUNASR_HOTWORD`: 容器内热词文件路径。
 
 ## HTTP API 配置
 
-从样例复制：
+文件位置：
 
-```bash
-cp deploy/config/http-api.env.example deploy/config/http-api.env
+```text
+/data/funasr/runtime/config/http-api.env
 ```
 
 关键配置：
@@ -33,115 +73,47 @@ UPLOAD_TEMP_DIR=/app/tmp
 LOG_FILE=/app/logs/http-api.log
 ```
 
-常用说明：
+`MAX_UPLOAD_SIZE=31457280` 表示同步接口默认上传上限为 30MB。
 
-- `FUNASR_WS_URL`: HTTP API 连接 FunASR Server 的 websocket 地址。
-- `FUNASR_MODE`: 当前面向文件转写，默认使用 `offline`。
-- `FUNASR_FINAL_TIMEOUT`: 等待 FunASR final 结果的超时时间。
-- `REQUEST_TIMEOUT`: HTTP 请求整体超时时间。
-- `TIMEOUT_KEEP_ALIVE`: HTTP keep-alive 连接保持时间。
-- `HTTP_API_WORKERS`: HTTP API worker 进程数。当前异步模型默认单进程。
-- `HTTP_API_LIMIT_CONCURRENCY`: HTTP 层最大并发连接/任务数，用于保护 HTTP 入口。
-- `HTTP_API_LIMIT_MAX_REQUESTS`: 单个 worker 处理达到该请求数后重启，降低长期运行风险。
-- `HTTP_API_BACKLOG`: TCP 等待队列大小，用于吸收瞬时连接峰值。
-- `ASR_RECOGNITION_CONCURRENCY`: 同时允许进入 FunASR 识别的业务并发数，默认 10。
-- `MAX_UPLOAD_SIZE`: 同步识别接口上传文件大小上限，单位为字节。默认样例为 30MB。
-- `UPLOAD_TEMP_DIR`: 容器内上传临时目录。
-- `LOG_FILE`: 容器内日志文件路径。
+## 热词配置
 
-## FunASR Server 配置
-
-FunASR Server 通过 `deploy/config/start-funasr.sh` 启动。该脚本借鉴官方 `runtime/run_server.sh` 的参数组织方式，但使用 `exec` 前台运行，适合 Docker 容器生命周期管理。
-
-脚本支持三种配置方式：
-
-- 修改 `deploy/config/start-funasr.sh` 中的默认变量。
-- 通过环境变量覆盖默认值。
-- 通过官方 `parse_options.sh` 风格的启动参数覆盖，例如 `--port 10096 --model-dir damo/xxx`。
-
-默认模型：
+热词运行文件：
 
 ```text
-ASR  主模型：damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
-VAD  模型：  damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-PUNC 标点：  damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
-ITN  模型：  thuduj12/fst_itn_zh
-LM   语言模型：damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+/data/funasr/runtime/config/hotwords.txt
 ```
 
-模型配置位于 `deploy/config/start-funasr.sh`：
+热词格式参考：
+
+```text
+/data/funasr/runtime/config/hotwords.txt.template
+```
+
+`hotwords.txt` 是运行文件，只写真实热词数据行：
+
+```text
+乡村振兴 20
+通义实验室 30
+```
+
+`hotwords.txt.template` 可以包含注释。由于官方文档没有说明热词文件支持注释，运行文件不要直接复制模板内容，避免 FunASR 热词解析器误读注释。
+
+修改热词后重启 FunASR Server：
 
 ```bash
-download_model_dir="${FUNASR_DOWNLOAD_MODEL_DIR:-/workspace/models}"
-model_dir="${FUNASR_ASR_MODEL:-damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
-vad_dir="${FUNASR_VAD_MODEL:-damo/speech_fsmn_vad_zh-cn-16k-common-onnx}"
-punc_dir="${FUNASR_PUNC_MODEL:-damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx}"
-itn_dir="${FUNASR_ITN_MODEL:-thuduj12/fst_itn_zh}"
-lm_dir="${FUNASR_LM_MODEL:-damo/speech_ngram_lm_zh-cn-ai-wesp-fst}"
+bash scripts/update.sh hotwords /data/funasr
 ```
 
-模型值可以是 ModelScope 模型 ID，也可以是容器内本地模型路径。例如离线环境固定本地模型时，可以改为：
+## 修改 FunASR Server 启动逻辑
+
+FunASR Server 启动脚本源码位于：
+
+```text
+components/funasr-server/start-funasr.sh
+```
+
+修改后重建并更新：
 
 ```bash
-model_dir="${FUNASR_ASR_MODEL:-/workspace/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
-```
-
-模型下载和缓存目录固定为：
-
-```text
-/workspace/models
-```
-
-该目录由宿主机 `deploy/models` 挂载进入容器。
-
-线程相关参数默认按官方脚本逻辑自动计算：
-
-```text
-decoder_thread_num = CPU 核数
-io_thread_num      = ceil(decoder_thread_num / 16)
-model_thread_num   = 1
-```
-
-如需固定线程数，可以通过环境变量覆盖：
-
-```bash
-FUNASR_DECODER_THREAD_NUM=28
-FUNASR_IO_THREAD_NUM=2
-FUNASR_MODEL_THREAD_NUM=1
-```
-
-SSL 配置与官方脚本保持一致：`FUNASR_CERTFILE` 为空或 `0` 时关闭 SSL，同时 `FUNASR_KEYFILE` 也会置空。
-
-启动时会生成：
-
-```text
-/workspace/.config/server_config
-```
-
-该文件用于记录实际启动参数，便于排查运行配置。
-
-热词文件：
-
-```text
-deploy/config/hotwords.txt
-```
-
-带中文注释的热词样例：
-
-```text
-deploy/config/hotwords.example.txt
-```
-
-`hotwords.txt` 建议只保留实际热词数据行，避免 FunASR 热词解析器不支持注释。
-
-模型目录挂载到容器内：
-
-```text
-/workspace/models
-```
-
-热词和启动脚本挂载到容器内：
-
-```text
-/workspace/config
+bash scripts/update.sh funasr-server /data/funasr
 ```

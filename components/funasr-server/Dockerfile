@@ -6,3 +6,8 @@ RUN set -eux; \
     cd /workspace/FunASR/runtime/websocket; \
     grep -n 'jsonresult\["is_final"\]' bin/websocket-server.cpp; \
     cmake --build build --target funasr-wss-server -j"$(nproc)"
+
+COPY start-funasr.sh /usr/local/bin/start-funasr.sh
+RUN chmod +x /usr/local/bin/start-funasr.sh
+
+ENTRYPOINT ["bash", "/usr/local/bin/start-funasr.sh"]

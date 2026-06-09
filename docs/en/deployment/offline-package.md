@@ -1,36 +1,55 @@
 # Offline Package
 
-This document describes how to create a complete offline delivery package in an online environment.
+This document is for the online packaging environment. Corresponding script:
+
+```text
+scripts/package-offline.sh
+```
 
 ## Prerequisites
 
-- Both images have been built.
-- `deploy/config/http-api.env` has been checked.
-- FunASR model files have been placed under `deploy/models`.
+- Docker and Docker Compose v2 are installed.
+- The packaging machine has `rsync`, `tar`, and `sha256sum` installed.
+- `deploy-template/config/http-api.env.template` has been checked.
+- FunASR model files have been placed under `deploy-template/models`.
 
-## Build Images
-
-```bash
-bash scripts/build.sh
-```
+Offline environments cannot download models, so `deploy-template/models` must exist and must not be empty.
 
 ## Package
+
+By default, the script builds images before creating the offline package:
 
 ```bash
 bash scripts/package-offline.sh
 ```
 
-The default output directory is `dist/`, which contains:
+If images already exist, skip the build step:
+
+```bash
+bash scripts/package-offline.sh --no-build
+```
+
+`--no-build` checks whether required images exist locally. Missing images fail early.
+
+Specify output directory:
+
+```bash
+bash scripts/package-offline.sh /data/offline-package
+```
+
+## Output
+
+Default output:
 
 ```text
 dist/funasr-deploy-kit-offline/
 dist/funasr-deploy-kit-offline.tar.gz
 ```
 
-You can also specify the output directory:
+Recommended transfer file:
 
-```bash
-bash scripts/package-offline.sh /data/offline-package
+```text
+funasr-deploy-kit-offline.tar.gz
 ```
 
 ## Package Layout
@@ -42,41 +61,36 @@ funasr-deploy-kit-offline/
 |-- install.sh
 |-- offline-data/
 |   |-- funasr-images.tar
-|   |-- funasr-runtime-data.tgz
+|   |-- runtime-data.tgz
 |   `-- SHA256SUMS.txt
 `-- funasr-deploy-kit/
+    |-- components/
+    |-- deploy-template/
     |-- docs/
-    |-- scripts/
-    |-- deploy/
-    `-- components/
+    `-- scripts/
 ```
 
-## Artifacts
+Notes:
 
-- `funasr-deploy-kit-offline.tar.gz`: Final delivery archive. This is the recommended file to transfer.
-- `install.sh`: Offline installation entrypoint. It prompts for the install path and asks for confirmation.
-- `offline-data/funasr-images.tar`: Docker image archive containing HTTP API and FunASR Server images.
-- `offline-data/funasr-runtime-data.tgz`: Runtime data archive containing Compose files, configuration, hotwords, startup scripts, and models.
-- `offline-data/SHA256SUMS.txt`: Checksum file for offline data.
-- `funasr-deploy-kit/`: Project directory with scripts, documentation, deployment templates, and source code.
+- `install.sh`: outer offline install entrypoint, copied from `deploy-template/offline-package/install.sh`.
+- `README.md`, `README.en.md`: offline package notes copied from `deploy-template/offline-package/`.
+- `offline-data/funasr-images.tar`: Docker image archive.
+- `offline-data/runtime-data.tgz`: runtime data archive containing `config/` and `models/`.
+- `funasr-deploy-kit/`: project reference directory with scripts, docs, templates, and source code.
 
-## Excluded Content
+## Exclusion Rules
 
-When copying the project directory, these paths are excluded:
+When copying the project reference directory, the script uses the repository root `.gitignore` as the main exclusion rule source and also excludes:
 
 ```text
 .git/
-.idea/
-.venv/
-components/http-api/.venv/
-deploy/models/
-deploy/logs/
-deploy/tmp/
-dist/
-dest/
-*.tar
-*.tgz
-*.tar.gz
+current output directory
 ```
 
-Models are not copied as project source files. They are included in `offline-data/funasr-runtime-data.tgz`.
+This avoids copying Git metadata, virtual environments, models, logs, and generated offline packages into the project reference directory.
+
+Models are not copied as project source files. They are included in:
+
+```text
+offline-data/runtime-data.tgz
+```

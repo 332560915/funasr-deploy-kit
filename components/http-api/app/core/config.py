@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """应用配置。
 
-    配置优先从环境变量读取，容器内也会把 deploy/config/http-api.env 挂载为 .env。
+    配置优先从环境变量读取，容器内会把运行目录 runtime/config/http-api.env 挂载为 .env。
     字段名大小写不敏感，便于 Docker Compose 使用大写环境变量。
     """
 

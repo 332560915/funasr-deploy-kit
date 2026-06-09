@@ -1,34 +1,57 @@
 # Scripts
 
-This directory only keeps shell scripts that can run on Linux/macOS. Production offline deployment targets are treated as Linux servers.
+This directory only keeps shell scripts usable on Linux/macOS. Production offline deployment targets are treated as Linux servers.
 
-Scripts locate the repository root from their own file path, so they do not depend on the current working directory.
+Scripts locate the repository root from their own path, so they do not depend on the current working directory.
 
-## Script List
+## Scenario Scripts
 
 ```text
-build.sh             Build images defined in Compose
-package-offline.sh   Create a complete offline delivery package
-load-offline.sh      Import images from offline data and start services
+quick-start.sh       First run: build images, create runtime directory, start services, print verification commands
+deploy-online.sh     Online deployment: create an independent runtime directory, optionally build and start
+package-offline.sh   Create an offline delivery package in an online environment
+install-offline.sh   Offline install entrypoint, usually called by the outer install.sh in the offline package
+update.sh            Update running services by change type
+lib/                 Internal helpers, not a user entrypoint
 ```
 
-## Quick Usage
+## Progressive Usage
+
+First run:
 
 ```bash
-bash scripts/build.sh
-bash scripts/package-offline.sh
-bash scripts/load-offline.sh ../offline-data /data
+bash scripts/quick-start.sh
 ```
 
-After extracting the offline delivery package, use the outer install entrypoint:
+Online deployment:
+
+```bash
+bash scripts/deploy-online.sh /data/funasr
+```
+
+Create offline package:
+
+```bash
+bash scripts/package-offline.sh
+```
+
+Install after extracting the offline package:
 
 ```bash
 bash install.sh
 bash install.sh /opt
 ```
 
+Update HTTP API:
+
+```bash
+bash scripts/update.sh http-api /data/funasr
+```
+
 ## Related Documentation
 
-- [Build Images](../docs/en/deployment/build.md)
-- [Offline Package](../docs/en/deployment/offline-package.md)
+- [Getting Started](../docs/en/usage/getting-started.md)
+- [Online Deployment](../docs/en/deployment/deploy.md)
+- [Offline Packaging](../docs/en/deployment/offline-package.md)
 - [Offline Deployment](../docs/en/deployment/offline-deploy.md)
+- [Update and Maintenance](../docs/en/operations/update.md)

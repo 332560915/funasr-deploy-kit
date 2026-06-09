@@ -21,5 +21,5 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 - [HTTP API 调用](../../docs/zh/usage/api.md)
 - [配置说明](../../docs/zh/deployment/configuration.md)
-- [构建镜像](../../docs/zh/deployment/build.md)
+- [镜像构建说明](../../docs/zh/deployment/build.md)
 - [更新维护](../../docs/zh/operations/update.md)

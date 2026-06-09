@@ -1,19 +1,23 @@
-# Update
+# Update and Maintenance
 
-Different changes require different update operations. Avoid unnecessary rebuilds.
+This document is for maintenance after services are running. Corresponding script:
+
+```text
+scripts/update.sh
+```
 
 ## Change HTTP API Configuration
 
 File:
 
 ```text
-deploy/config/http-api.env
+/data/funasr/runtime/config/http-api.env
 ```
 
 Update:
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d http-api
+bash scripts/update.sh config /data/funasr
 ```
 
 ## Change Hotwords
@@ -21,27 +25,13 @@ docker compose -f deploy/docker-compose.yml up -d http-api
 File:
 
 ```text
-deploy/config/hotwords.txt
+/data/funasr/runtime/config/hotwords.txt
 ```
 
 Update:
 
 ```bash
-docker compose -f deploy/docker-compose.yml restart funasr-server
-```
-
-## Change FunASR Startup Script
-
-File:
-
-```text
-deploy/config/start-funasr.sh
-```
-
-Update:
-
-```bash
-docker compose -f deploy/docker-compose.yml restart funasr-server
+bash scripts/update.sh hotwords /data/funasr
 ```
 
 ## Change HTTP API Code
@@ -52,14 +42,19 @@ Directory:
 components/http-api
 ```
 
-Update:
+This rebuilds the HTTP API image and restarts `http-api`:
 
 ```bash
-docker compose -f deploy/docker-compose.yml build http-api
-docker compose -f deploy/docker-compose.yml up -d http-api
+bash scripts/update.sh http-api /data/funasr
 ```
 
-## Change FunASR Server Image Build
+If the image has already been built:
+
+```bash
+bash scripts/update.sh http-api /data/funasr --no-build
+```
+
+## Change FunASR Server
 
 Directory:
 
@@ -67,24 +62,49 @@ Directory:
 components/funasr-server
 ```
 
-Update:
+Use this for Dockerfile, startup script, or C++ websocket server patch changes:
 
 ```bash
-docker compose -f deploy/docker-compose.yml build funasr-server
-docker compose -f deploy/docker-compose.yml up -d funasr-server
+bash scripts/update.sh funasr-server /data/funasr
+```
+
+If the image has already been built:
+
+```bash
+bash scripts/update.sh funasr-server /data/funasr --no-build
 ```
 
 ## Update Models
 
-Directory:
+Model directory:
 
 ```text
-deploy/models
+/data/funasr/runtime/models
 ```
 
-Stop services first, replace models, then start services:
+After replacing models:
 
 ```bash
-docker compose -f deploy/docker-compose.yml down
-docker compose -f deploy/docker-compose.yml up -d
+bash scripts/update.sh models /data/funasr
 ```
+
+This stops the full stack, checks ports, and starts services again.
+
+## Update Compose Template
+
+If these files changed:
+
+```text
+deploy-template/docker-compose.yml
+deploy-template/compose.env.template
+deploy-template/README.md
+deploy-template/README.en.md
+```
+
+Sync them to the runtime directory:
+
+```bash
+bash scripts/update.sh compose /data/funasr
+```
+
+This stops the full stack, syncs templates, checks ports, and starts services again.

@@ -1,36 +1,55 @@
 # 离线打包
 
-本文说明如何在有网络的环境中生成完整离线交付包。
+本文面向有网络的打包环境，对应脚本：
+
+```text
+scripts/package-offline.sh
+```
 
 ## 前置条件
 
-- 两个镜像已经构建完成。
-- `deploy/config/http-api.env` 已经确认。
-- `deploy/models` 已经放入 FunASR 模型文件。
+- 已安装 Docker 和 Docker Compose v2。
+- 打包机已安装 `rsync`、`tar`、`sha256sum`。
+- `deploy-template/config/http-api.env.template` 已经确认。
+- `deploy-template/models` 已经放入 FunASR 模型文件。
 
-## 构建镜像
+离线环境不能下载模型，因此 `deploy-template/models` 必须存在且非空。
 
-```bash
-bash scripts/build.sh
-```
+## 执行打包
 
-## 打包
+默认会先构建镜像，再生成离线包：
 
 ```bash
 bash scripts/package-offline.sh
 ```
 
-默认输出目录为 `dist/`，会生成：
+如果镜像已经存在，可以跳过构建：
+
+```bash
+bash scripts/package-offline.sh --no-build
+```
+
+`--no-build` 会检查本机是否已有所需镜像。缺少镜像时会提前报错。
+
+指定输出目录：
+
+```bash
+bash scripts/package-offline.sh /data/offline-package
+```
+
+## 输出结果
+
+默认输出：
 
 ```text
 dist/funasr-deploy-kit-offline/
 dist/funasr-deploy-kit-offline.tar.gz
 ```
 
-也可以指定输出目录：
+推荐只传递最终压缩包：
 
-```bash
-bash scripts/package-offline.sh /data/offline-package
+```text
+funasr-deploy-kit-offline.tar.gz
 ```
 
 ## 离线包结构
@@ -42,41 +61,36 @@ funasr-deploy-kit-offline/
 |-- install.sh
 |-- offline-data/
 |   |-- funasr-images.tar
-|   |-- funasr-runtime-data.tgz
+|   |-- runtime-data.tgz
 |   `-- SHA256SUMS.txt
 `-- funasr-deploy-kit/
+    |-- components/
+    |-- deploy-template/
     |-- docs/
-    |-- scripts/
-    |-- deploy/
-    `-- components/
+    `-- scripts/
 ```
 
-## 产物说明
+说明：
 
-- `funasr-deploy-kit-offline.tar.gz`: 最终交付压缩包，推荐只传递这个文件。
-- `install.sh`: 离线安装入口，会提示安装路径并要求确认。
-- `offline-data/funasr-images.tar`: Docker 镜像包，包含 HTTP API 和 FunASR Server 镜像。
-- `offline-data/funasr-runtime-data.tgz`: 运行目录包，包含 Compose 文件、配置、热词、启动脚本和模型目录。
-- `offline-data/SHA256SUMS.txt`: 离线数据校验文件。
-- `funasr-deploy-kit/`: 工程目录，包含脚本、文档、部署模板和源码。
+- `install.sh`: 离线包外层安装入口，来自 `deploy-template/offline-package/install.sh`。
+- `README.md`、`README.en.md`: 离线包说明，来自 `deploy-template/offline-package/`。
+- `offline-data/funasr-images.tar`: Docker 镜像包。
+- `offline-data/runtime-data.tgz`: 运行数据包，包含 `config/` 和 `models/`。
+- `funasr-deploy-kit/`: 工程资料目录，包含脚本、文档、模板和源码。
 
-## 排除内容
+## 排除规则
 
-打包工程目录时会排除：
+复制工程资料时，脚本使用项目根目录 `.gitignore` 作为主要排除规则，并额外排除：
 
 ```text
 .git/
-.idea/
-.venv/
-components/http-api/.venv/
-deploy/models/
-deploy/logs/
-deploy/tmp/
-dist/
-dest/
-*.tar
-*.tgz
-*.tar.gz
+当前输出目录
 ```
 
-模型不会作为工程源码复制，而是进入 `offline-data/funasr-runtime-data.tgz`。
+这样可以避免把 Git 元数据、虚拟环境、模型、日志和生成中的离线包递归复制到工程资料目录。
+
+模型不会作为工程源码复制，而是进入：
+
+```text
+offline-data/runtime-data.tgz
+```

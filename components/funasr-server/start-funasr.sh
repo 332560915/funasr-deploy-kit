@@ -7,8 +7,8 @@ set -euo pipefail
 # 让 funasr-wss-server 成为容器主进程，便于 Docker 管理生命周期和日志。
 #
 # 目录约定：
-# - /workspace/models  由宿主机 ./models 挂载，存放或缓存 FunASR 模型。
-# - /workspace/config  由宿主机 ./config 挂载，存放启动脚本和热词文件。
+# - /workspace/models  由宿主机 runtime/models 挂载，存放或缓存 FunASR 模型。
+# - /workspace/config  由宿主机 runtime/config 挂载，存放热词等外置配置文件。
 #
 # 常用可覆盖环境变量：
 # - FUNASR_DOWNLOAD_MODEL_DIR  模型下载和缓存目录，默认 /workspace/models。
@@ -61,7 +61,7 @@ else
 fi
 
 # 兼容官方脚本的参数覆盖方式，例如：
-# bash start-funasr.sh --port 10096 --model-dir damo/xxx
+# docker run ... local/funasr-runtime-sdk-cpu:0.4.7-is-final --port 10096 --model-dir damo/xxx
 parse_options="/workspace/FunASR/runtime/tools/utils/parse_options.sh"
 if [ -f "$parse_options" ]; then
   set +u

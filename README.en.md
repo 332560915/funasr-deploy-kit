@@ -6,7 +6,7 @@ Docker deployment kit for FunASR with HTTP API and offline delivery support.
 
 `funasr-deploy-kit` packages a deployable FunASR service stack. It runs the FunASR websocket server in Docker, wraps it with an HTTP file transcription API, and provides deployment files, offline packaging scripts, externalized configuration, logs, hotwords, and documentation for intranet or offline delivery scenarios.
 
-## Features
+## Purpose
 
 - File-based speech-to-text API: `POST /api/v1/asr`.
 - Built-in Swagger UI for browser testing: `/docs`.
@@ -23,31 +23,34 @@ Docker deployment kit for FunASR with HTTP API and offline delivery support.
 |-- components/
 |   |-- http-api/           HTTP file transcription API component
 |   `-- funasr-server/      FunASR websocket server component
-|-- deploy/                 Docker Compose files and deployment config examples
-|-- scripts/                Build, package, and offline load scripts
+|-- deploy-template/        Deployment and config templates, not the runtime directory
+|-- scripts/                Quick start, online deploy, offline package, offline install, and update scripts
 `-- docs/
     |-- zh/                 Chinese documentation
     `-- en/                 English documentation
 ```
 
-## English Documentation
+## Quick Links
 
 - [Getting Started](docs/en/usage/getting-started.md)
 - [HTTP API](docs/en/usage/api.md)
+- [Online Deployment](docs/en/deployment/deploy.md)
 - [Configuration](docs/en/deployment/configuration.md)
-- [Build Images](docs/en/deployment/build.md)
-- [Deploy](docs/en/deployment/deploy.md)
-- [Update](docs/en/operations/update.md)
-- [Offline Package](docs/en/deployment/offline-package.md)
+- [Offline Packaging](docs/en/deployment/offline-package.md)
 - [Offline Deployment](docs/en/deployment/offline-deploy.md)
+- [Update and Maintenance](docs/en/operations/update.md)
 - [Troubleshooting](docs/en/operations/troubleshooting.md)
-- [FunASR final Message Notes](docs/en/reference/funasr-is-final.md)
-- [Next Version Plan](docs/en/reference/next-version-plan.md)
-- [Changelog](CHANGELOG.en.md)
 
-## Component Entrypoints
+## More Documentation
 
+- [Full English Documentation Map](docs/en/index.md)
+- [中文文档](README.md)
+- [Changelog](docs/CHANGELOG.en.md)
+
+## Development and Maintenance
+
+- [Components Directory](components/README.en.md)
 - [HTTP API Component](components/http-api/README.en.md)
 - [FunASR Server Component](components/funasr-server/README.en.md)
-- [Deployment Directory](deploy/README.en.md)
+- [Runtime README Template](deploy-template/README.en.md)
 - [Scripts](scripts/README.en.md)

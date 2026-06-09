@@ -1,47 +1,73 @@
-# 构建镜像
+# 镜像构建说明
 
-本文说明在线环境中的镜像构建方式。
+镜像构建已经纳入场景脚本，不再提供单独的用户入口脚本。
 
-## 构建全部镜像
+## 自动构建场景
 
-```bash
-bash scripts/build.sh
-```
-
-等价于：
+快速开始：
 
 ```bash
-docker compose -f deploy/docker-compose.yml build
+bash scripts/quick-start.sh
 ```
 
-## 只构建 HTTP API
+在线部署：
 
 ```bash
-docker compose -f deploy/docker-compose.yml build http-api
+bash scripts/deploy-online.sh /data/funasr
 ```
 
-## 只构建 FunASR Server
+离线打包：
 
 ```bash
-docker compose -f deploy/docker-compose.yml build funasr-server
+bash scripts/package-offline.sh
 ```
 
-## 直接构建组件镜像
+这些脚本默认会构建所需镜像。
 
-HTTP API：
+## 跳过构建
+
+如果镜像已经存在，可以使用 `--no-build`：
 
 ```bash
-docker build -t local/http-api:latest components/http-api
+bash scripts/deploy-online.sh /data/funasr --no-build
+bash scripts/package-offline.sh --no-build
 ```
 
-FunASR Server：
+脚本会提前检查本机 Docker 是否存在所需镜像。缺少镜像时会报错。
+
+## 单组件更新
+
+更新 HTTP API：
 
 ```bash
-docker build -t local/funasr-runtime-sdk-cpu:0.4.7-is-final components/funasr-server
+bash scripts/update.sh http-api /data/funasr
 ```
+
+更新 FunASR Server：
+
+```bash
+bash scripts/update.sh funasr-server /data/funasr
+```
+
+## 镜像名来源
+
+镜像名来自：
+
+```text
+deploy-template/compose.env.template
+```
+
+默认值：
+
+```env
+FUNASR_SERVER_IMAGE=local/funasr-runtime-sdk-cpu:0.4.7-is-final
+HTTP_API_IMAGE=local/http-api:latest
+```
+
+构建、启动和离线打包都读取同一份模板，避免不同场景使用不同镜像名。
 
 ## 缓存说明
 
-Docker 会按层复用缓存。HTTP API 的 Dockerfile 先复制 `pyproject.toml` 和 `uv.lock` 安装依赖，再复制业务代码，因此只修改 Python 业务代码时通常不会重新安装依赖。
+Docker 会按层复用缓存。HTTP API 镜像会先安装依赖，再复制业务代码，因此只修改 Python 业务代码时通常不会重新安装依赖。
 
-FunASR Server 镜像会在构建时 patch C++ websocket server 并重新编译 `funasr-wss-server`。只要 Dockerfile 和基础镜像不变，该编译层可以命中缓存。
+FunASR Server 镜像会编译 `funasr-wss-server`。基础镜像、Dockerfile 和相关源码不变时，编译层通常可以复用缓存。

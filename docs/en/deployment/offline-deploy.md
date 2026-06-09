@@ -1,46 +1,31 @@
 # Offline Deployment
 
-Offline environments should only load images and start containers. Do not rebuild images on offline servers. Build and verify the platform in an online environment first, then create a complete offline package.
+This document is for environments without network access. Offline targets only load images, restore runtime data, and start containers. They do not rebuild images.
 
-## Package in Online Environment
+## Prepare Offline Package
 
-Make sure runtime configuration is ready:
-
-```bash
-cp deploy/config/http-api.env.example deploy/config/http-api.env
-vi deploy/config/http-api.env
-```
-
-Build images:
-
-```bash
-bash scripts/build.sh
-```
-
-Package offline materials:
+Create the offline package in an online environment:
 
 ```bash
 bash scripts/package-offline.sh
 ```
 
-Default output:
+Output:
 
 ```text
 dist/funasr-deploy-kit-offline.tar.gz
 ```
 
-`package-offline.sh` checks whether `deploy/config/http-api.env` exists. This file is not committed to the repository, so copy it from `.example` and confirm the values before packaging.
+Copy this archive to the offline server.
 
-The script also checks that `deploy/models` exists and is not empty. Offline environments cannot download models, so place FunASR models under `deploy/models` before packaging.
-
-## Install in Offline Environment
-
-Copy `funasr-deploy-kit-offline.tar.gz` to the offline server and extract it:
+## Extract
 
 ```bash
 tar -xzf funasr-deploy-kit-offline.tar.gz
 cd funasr-deploy-kit-offline
 ```
+
+## Install
 
 Install to `/data/funasr` by default:
 
@@ -54,41 +39,64 @@ Install to `/opt/funasr`:
 bash install.sh /opt
 ```
 
-The install script displays:
+Note: the outer `install.sh` receives an install root. `bash install.sh /opt` installs to `/opt/funasr`.
 
-```text
-offline data directory
-project directory
-install root
-final deployment directory
-```
-
-and asks for confirmation before continuing. To skip confirmation:
+Skip confirmation:
 
 ```bash
 bash install.sh /opt --yes
 ```
 
-You can also call the lower-level load script directly:
+## Install Steps
 
-```bash
-cd funasr-deploy-kit
-bash scripts/load-offline.sh ../offline-data /data
-```
+The installer:
 
-Arguments:
+- Verifies `offline-data/SHA256SUMS.txt`.
+- Imports images with `docker load`.
+- Stops and backs up the old runtime directory if it already exists.
+- Restores runtime data into `runtime/`.
+- Copies `docker-compose.yml`, `.env`, and runtime `README.md`.
+- Checks `FUNASR_HOST_PORT` and `HTTP_API_PORT` before startup.
+- Starts services.
+
+## Result
+
+Default runtime directory:
 
 ```text
-first argument: offline data directory, defaults to ../offline-data next to the project directory
-second argument: install root, defaults to /data
-final deployment directory: install root/funasr
+/data/funasr/
+|-- docker-compose.yml
+|-- .env
+|-- README.md
+|-- README.en.md
+`-- runtime/
 ```
+
+`funasr-deploy-kit/` is a project reference directory with scripts, docs, and source code. It can be removed after installation if only the running service is needed.
 
 ## Verify
 
 ```bash
 cd /data/funasr
-docker compose -f docker-compose.offline.yml ps
+docker compose ps
 curl http://127.0.0.1:18000/health
-curl -F "file=@/data/funasr/models/audio/test.mp4" http://127.0.0.1:18000/api/v1/asr
+```
+
+Swagger test page:
+
+```text
+http://127.0.0.1:18000/docs
+```
+
+Upload a file:
+
+```bash
+curl -F "file=@/path/to/audio-or-video.mp4" http://127.0.0.1:18000/api/v1/asr
+```
+
+The lower-level install script can also be called directly:
+
+```bash
+cd funasr-deploy-kit
+bash scripts/install-offline.sh ../offline-data /data/funasr
 ```

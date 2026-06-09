@@ -1,47 +1,73 @@
-# Build Images
+# Image Build Notes
 
-This document describes how to build images in an online environment.
+Image builds are included in scenario scripts. There is no separate user-facing build-only script.
 
-## Build All Images
+## Image Build Scenarios
 
-```bash
-bash scripts/build.sh
-```
-
-Equivalent command:
+Quick start:
 
 ```bash
-docker compose -f deploy/docker-compose.yml build
+bash scripts/quick-start.sh
 ```
 
-## Build HTTP API Only
+Online deployment:
 
 ```bash
-docker compose -f deploy/docker-compose.yml build http-api
+bash scripts/deploy-online.sh /data/funasr
 ```
 
-## Build FunASR Server Only
+Offline packaging:
 
 ```bash
-docker compose -f deploy/docker-compose.yml build funasr-server
+bash scripts/package-offline.sh
 ```
 
-## Build Component Images Directly
+These scripts build required images by default.
 
-HTTP API:
+## Skip Build
+
+If images already exist, use `--no-build`:
 
 ```bash
-docker build -t local/http-api:latest components/http-api
+bash scripts/deploy-online.sh /data/funasr --no-build
+bash scripts/package-offline.sh --no-build
 ```
 
-FunASR Server:
+The script checks whether required images exist locally. Missing images fail early.
+
+## Update One Component
+
+Update HTTP API:
 
 ```bash
-docker build -t local/funasr-runtime-sdk-cpu:0.4.7-is-final components/funasr-server
+bash scripts/update.sh http-api /data/funasr
 ```
+
+Update FunASR Server:
+
+```bash
+bash scripts/update.sh funasr-server /data/funasr
+```
+
+## Image Name Source
+
+Image names come from:
+
+```text
+deploy-template/compose.env.template
+```
+
+Defaults:
+
+```env
+FUNASR_SERVER_IMAGE=local/funasr-runtime-sdk-cpu:0.4.7-is-final
+HTTP_API_IMAGE=local/http-api:latest
+```
+
+Build, startup, and offline packaging all read the same template to keep image names consistent.
 
 ## Cache Notes
 
-Docker reuses cache by layer. The HTTP API Dockerfile copies `pyproject.toml` and `uv.lock` first to install dependencies, then copies application code. When only Python business code changes, dependencies are usually not reinstalled.
+Docker reuses build cache by layer. The HTTP API image installs dependencies before copying business code, so changing Python code usually does not reinstall dependencies.
 
-The FunASR Server image patches the C++ websocket server and rebuilds `funasr-wss-server` during image build. As long as the Dockerfile and base image do not change, this build layer can hit cache.
+The FunASR Server image compiles `funasr-wss-server`. If the base image, Dockerfile, and related sources do not change, that compile layer can usually reuse cache.

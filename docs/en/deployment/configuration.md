@@ -1,19 +1,59 @@
 # Configuration
 
-Configuration is split into two groups:
+After installation, day-to-day configuration should be changed in the runtime directory, not in `deploy-template/`.
 
-- HTTP API configuration: `deploy/config/http-api.env`
-- FunASR Server startup configuration: `deploy/config/start-funasr.sh`
+## Configuration Types
+
+```text
+/data/funasr/.env                         Compose runtime configuration
+/data/funasr/runtime/config/http-api.env  HTTP API configuration
+/data/funasr/runtime/config/hotwords.txt  Runtime hotword file
+```
+
+## Compose Runtime Configuration
+
+File:
+
+```text
+/data/funasr/.env
+```
+
+Common options:
+
+```env
+FUNASR_SERVER_IMAGE=local/funasr-runtime-sdk-cpu:0.4.7-is-final
+HTTP_API_IMAGE=local/http-api:latest
+
+FUNASR_HOST_PORT=10095
+FUNASR_SERVER_PORT=10095
+HTTP_API_PORT=18000
+
+FUNASR_DOWNLOAD_MODEL_DIR=/workspace/models
+FUNASR_ASR_MODEL=damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
+FUNASR_VAD_MODEL=damo/speech_fsmn_vad_zh-cn-16k-common-onnx
+FUNASR_PUNC_MODEL=damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
+FUNASR_ITN_MODEL=thuduj12/fst_itn_zh
+FUNASR_LM_MODEL=damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+FUNASR_HOTWORD=/workspace/config/hotwords.txt
+```
+
+Notes:
+
+- `FUNASR_SERVER_IMAGE`, `HTTP_API_IMAGE`: runtime image names.
+- `FUNASR_HOST_PORT`: FunASR Server host port.
+- `HTTP_API_PORT`: HTTP API host port.
+- `FUNASR_*_MODEL`: model ID or model path inside the container.
+- `FUNASR_HOTWORD`: hotword file path inside the container.
 
 ## HTTP API Configuration
 
-Copy the sample file:
+File:
 
-```bash
-cp deploy/config/http-api.env.example deploy/config/http-api.env
+```text
+/data/funasr/runtime/config/http-api.env
 ```
 
-Important values:
+Key options:
 
 ```env
 APP_NAME=FunASR HTTP API
@@ -33,115 +73,47 @@ UPLOAD_TEMP_DIR=/app/tmp
 LOG_FILE=/app/logs/http-api.log
 ```
 
-Common settings:
+`MAX_UPLOAD_SIZE=31457280` means the synchronous upload limit defaults to 30MB.
 
-- `FUNASR_WS_URL`: Websocket URL used by HTTP API to connect to FunASR Server.
-- `FUNASR_MODE`: File transcription uses `offline` by default.
-- `FUNASR_FINAL_TIMEOUT`: Timeout for waiting for the final FunASR result.
-- `REQUEST_TIMEOUT`: Overall HTTP request timeout.
-- `TIMEOUT_KEEP_ALIVE`: HTTP keep-alive timeout.
-- `HTTP_API_WORKERS`: Number of HTTP API worker processes. The current async model uses one worker by default.
-- `HTTP_API_LIMIT_CONCURRENCY`: Maximum HTTP-level concurrent connections/tasks. It protects the HTTP entrypoint.
-- `HTTP_API_LIMIT_MAX_REQUESTS`: Restart a worker after it has processed this many requests to reduce long-running risk.
-- `HTTP_API_BACKLOG`: TCP backlog used to absorb short connection spikes.
-- `ASR_RECOGNITION_CONCURRENCY`: Business concurrency allowed to enter FunASR recognition. The default is 10.
-- `MAX_UPLOAD_SIZE`: Upload size limit for the synchronous transcription API, in bytes. The default sample value is 30MB.
-- `UPLOAD_TEMP_DIR`: Temporary upload directory inside the container.
-- `LOG_FILE`: Log file path inside the container.
+## Hotwords
 
-## FunASR Server Configuration
-
-FunASR Server is started by `deploy/config/start-funasr.sh`. The script follows the parameter style of the official `runtime/run_server.sh`, but uses foreground `exec` so it works better as the main Docker container process.
-
-The script supports three configuration methods:
-
-- Change default variables in `deploy/config/start-funasr.sh`.
-- Override defaults with environment variables.
-- Override values with official `parse_options.sh`-style startup arguments, such as `--port 10096 --model-dir damo/xxx`.
-
-Default models:
+Runtime hotword file:
 
 ```text
-ASR  model:          damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx
-VAD  model:          damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-PUNC model:          damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx
-ITN  model:          thuduj12/fst_itn_zh
-LM   language model: damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+/data/funasr/runtime/config/hotwords.txt
 ```
 
-Model settings are in `deploy/config/start-funasr.sh`:
+Format reference:
+
+```text
+/data/funasr/runtime/config/hotwords.txt.template
+```
+
+`hotwords.txt` should contain only actual hotword data lines:
+
+```text
+乡村振兴 20
+通义实验室 30
+```
+
+`hotwords.txt.template` may contain comments. The official documentation does not state that hotword files support comments, so do not copy the template content directly into the runtime file.
+
+Apply hotword changes:
 
 ```bash
-download_model_dir="${FUNASR_DOWNLOAD_MODEL_DIR:-/workspace/models}"
-model_dir="${FUNASR_ASR_MODEL:-damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
-vad_dir="${FUNASR_VAD_MODEL:-damo/speech_fsmn_vad_zh-cn-16k-common-onnx}"
-punc_dir="${FUNASR_PUNC_MODEL:-damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx}"
-itn_dir="${FUNASR_ITN_MODEL:-thuduj12/fst_itn_zh}"
-lm_dir="${FUNASR_LM_MODEL:-damo/speech_ngram_lm_zh-cn-ai-wesp-fst}"
+bash scripts/update.sh hotwords /data/funasr
 ```
 
-Each model value can be a ModelScope model ID or a local model path inside the container. For example, to pin a local model path in an offline environment:
+## Change FunASR Server Startup Logic
+
+Source path:
+
+```text
+components/funasr-server/start-funasr.sh
+```
+
+Rebuild and update:
 
 ```bash
-model_dir="${FUNASR_ASR_MODEL:-/workspace/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx}"
-```
-
-Model download and cache directory:
-
-```text
-/workspace/models
-```
-
-This directory is mounted from host directory `deploy/models`.
-
-Thread parameters follow the official script's automatic calculation by default:
-
-```text
-decoder_thread_num = CPU core count
-io_thread_num      = ceil(decoder_thread_num / 16)
-model_thread_num   = 1
-```
-
-To pin thread values, override them with environment variables:
-
-```bash
-FUNASR_DECODER_THREAD_NUM=28
-FUNASR_IO_THREAD_NUM=2
-FUNASR_MODEL_THREAD_NUM=1
-```
-
-SSL behavior matches the official script: when `FUNASR_CERTFILE` is empty or `0`, SSL is disabled and `FUNASR_KEYFILE` is cleared as well.
-
-The startup script writes the effective server arguments to:
-
-```text
-/workspace/.config/server_config
-```
-
-This file is useful when troubleshooting runtime configuration.
-
-Hotword file:
-
-```text
-deploy/config/hotwords.txt
-```
-
-Hotword sample with Chinese comments:
-
-```text
-deploy/config/hotwords.example.txt
-```
-
-`hotwords.txt` should contain only actual hotword data lines because the FunASR hotword parser may not support comments.
-
-The model directory is mounted into the container:
-
-```text
-/workspace/models
-```
-
-Hotwords and the startup script are mounted into the container:
-
-```text
-/workspace/config
+bash scripts/update.sh funasr-server /data/funasr
 ```

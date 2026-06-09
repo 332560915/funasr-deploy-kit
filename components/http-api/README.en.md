@@ -21,5 +21,5 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 - [HTTP API](../../docs/en/usage/api.md)
 - [Configuration](../../docs/en/deployment/configuration.md)
-- [Build Images](../../docs/en/deployment/build.md)
+- [Image Build Notes](../../docs/en/deployment/build.md)
 - [Update](../../docs/en/operations/update.md)

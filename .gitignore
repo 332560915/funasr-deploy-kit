@@ -1,10 +1,10 @@
 # IDE / editor files
 .idea/
 .vscode/
+.DS_Store
 
-# Python-generated files
+# Python cache and build artifacts
 __pycache__/
-**/__pycache__/
 *.py[oc]
 build/
 dist/
@@ -18,20 +18,20 @@ htmlcov/
 
 # Virtual environments
 .venv/
-components/http-api/.venv/
 
-# Local runtime files
+# Local environment and runtime files
 .env
+.env.*
+!.env.example
 *.log
 logs/
 tmp/
-deploy/config/http-api.env
-deploy/logs/
-deploy/models/
-deploy/tmp/
+
+# Local model cache/data for offline packaging
+deploy-template/models/
 
 # Offline/package artifacts
-dist/
+funasr-deploy-kit-offline/
 *.tar
 *.tgz
 *.tar.gz
