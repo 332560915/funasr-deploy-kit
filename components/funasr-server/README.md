@@ -7,7 +7,11 @@
 - 运行 FunASR offline websocket ASR 服务。
 - 从外置模型目录 `/workspace/models` 加载模型。
 - 从外置配置目录 `/workspace/config` 读取启动脚本和热词。
-- 在镜像构建时 patch offline server 的 `is_final` 返回值，兼容官方异步客户端。
+- 维护 `src/websocket-server.cpp` 官方源码基线，便于后续通过 Git 追踪兼容修改。
+
+## 源码修改
+
+`src/websocket-server.cpp` 来自官方 FunASR runtime 的 `runtime/websocket/bin/websocket-server.cpp`。本项目不再使用 Dockerfile 中的 `sed` 全局替换。当前文件保持官方源码，后续如需修改 offline 最终响应，会直接在该源码文件中提交明确差异。
 
 ## 镜像
 
