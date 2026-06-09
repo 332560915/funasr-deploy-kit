@@ -6,7 +6,11 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables and .env."""
+    """应用配置。
+
+    配置优先从环境变量读取，容器内也会把 deploy/config/http-api.env 挂载为 .env。
+    字段名大小写不敏感，便于 Docker Compose 使用大写环境变量。
+    """
 
     app_name: str = "FunASR HTTP API"
     app_version: str = "1.0.0"
@@ -33,6 +37,7 @@ class Settings(BaseSettings):
     cors_allow_headers: List[str] = Field(default_factory=lambda: ["*"])
 
     funasr_ws_url: str = "ws://10.2.3.118:10095"
+    # 当前 HTTP 文件识别只面向 offline websocket server。
     funasr_mode: str = "offline"
     funasr_audio_fs: int = 16000
     funasr_chunk_size: List[int] = Field(default_factory=lambda: [5, 10, 5])
@@ -44,8 +49,11 @@ class Settings(BaseSettings):
     funasr_final_timeout: float = 30.0
     funasr_close_grace_seconds: float = 0.5
     funasr_max_message_size: int = 10 * 1024 * 1024
+
+    # 业务识别并发，区别于 HTTP 入口并发；用于保护 FunASR Server。
     asr_recognition_concurrency: int = 10
 
+    # 同步接口上传限制。上传文件会先落临时目录，再交给官方客户端识别。
     max_upload_size: int = 100 * 1024 * 1024
     upload_temp_dir: str = "/tmp"
 

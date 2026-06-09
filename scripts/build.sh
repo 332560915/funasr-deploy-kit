@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
+# 默认构建仓库内的 deploy/docker-compose.yml。
+# 也允许传入自定义 Compose 文件，便于在其他部署目录复用脚本。
 COMPOSE_FILE="${1:-${REPO_ROOT}/deploy/docker-compose.yml}"
 case "${COMPOSE_FILE}" in
   /*) ;;

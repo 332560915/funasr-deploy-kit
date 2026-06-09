@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
+# 输出目录只用于生成离线包，不代表最终安装目录。
+# 最终安装目录由离线包外层 install.sh 或 scripts/load-offline.sh 决定。
 OUTPUT_DIR="${1:-${REPO_ROOT}/dist}"
 case "${OUTPUT_DIR}" in
   /*) ;;
@@ -17,6 +19,7 @@ PROJECT_DIR="${PACKAGE_ROOT}/${PROJECT_NAME}"
 OFFLINE_DATA_DIR="${PACKAGE_ROOT}/offline-data"
 ARCHIVE_PATH="${OUTPUT_DIR}/${PACKAGE_NAME}.tar.gz"
 
+# 离线运行必须带实际配置文件，不能只带 .example。
 ENV_FILE="${REPO_ROOT}/deploy/config/http-api.env"
 if [ ! -f "${ENV_FILE}" ]; then
   echo "Missing deploy/config/http-api.env" >&2
@@ -35,6 +38,7 @@ mkdir -p "${OUTPUT_DIR}"
 rm -rf "${PACKAGE_ROOT}" "${ARCHIVE_PATH}"
 mkdir -p "${PROJECT_DIR}" "${OFFLINE_DATA_DIR}"
 
+# 如果输出目录位于仓库内部，需要额外排除它，避免把正在生成的离线包递归打进去。
 OUTPUT_REL="__funasr_no_extra_exclude__"
 case "${OUTPUT_DIR}" in
   "${REPO_ROOT}"/*)
@@ -43,6 +47,7 @@ case "${OUTPUT_DIR}" in
 esac
 
 echo "Copy project files..."
+# 工程目录用于保留脚本、文档和源码；模型、日志、临时文件进入 offline-data 或运行时重新生成。
 tar \
   --exclude='./.git' \
   --exclude='./.idea' \
@@ -65,11 +70,13 @@ tar \
   -C "${REPO_ROOT}" . | tar -xf - -C "${PROJECT_DIR}"
 
 echo "Save Docker images..."
+# 离线环境只做 docker load，不在目标机器重新构建镜像。
 docker save -o "${OFFLINE_DATA_DIR}/funasr-images.tar" \
   local/funasr-runtime-sdk-cpu:0.4.7-is-final \
   local/http-api:latest
 
 echo "Package runtime data..."
+# 运行目录包包含 compose、配置、热词和模型；排除历史日志、临时文件和模型下载缓存。
 tar \
   --dereference \
   --exclude='./logs/*' \
@@ -79,6 +86,7 @@ tar \
   -C "${REPO_ROOT}/deploy" .
 
 echo "Generate checksums..."
+# 校验文件只覆盖 offline-data 中的大文件，安装时 load-offline.sh 会自动校验。
 (
   cd "${OFFLINE_DATA_DIR}"
   sha256sum funasr-images.tar funasr-runtime-data.tgz > SHA256SUMS.txt
@@ -92,6 +100,7 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 PROJECT_DIR="${SCRIPT_DIR}/funasr-deploy-kit"
 OFFLINE_DATA_DIR="${SCRIPT_DIR}/offline-data"
 
+# 外层安装脚本面向最终使用者：先展示路径，再确认是否继续安装。
 usage() {
   cat <<'USAGE'
 FunASR Deploy Kit 离线安装
@@ -117,6 +126,7 @@ USAGE
 INSTALL_ROOT="/data"
 ASSUME_YES="${YES:-0}"
 
+# 第一个普通参数是安装根目录；--yes/-y 或 YES=1 用于自动化安装。
 for arg in "$@"; do
   case "$arg" in
     -h|--help)
@@ -173,6 +183,7 @@ if [ "${ASSUME_YES}" != "1" ]; then
   esac
 fi
 
+# 实际导入镜像、解压运行目录、启动 Compose 的逻辑由工程内脚本负责。
 exec bash "${PROJECT_DIR}/scripts/load-offline.sh" "${OFFLINE_DATA_DIR}" "${INSTALL_ROOT}"
 EOF
 
