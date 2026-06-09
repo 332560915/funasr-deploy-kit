@@ -8,8 +8,8 @@
 
 ```text
 build.sh             构建 Compose 中定义的镜像
-package-offline.sh   打包离线镜像和运行目录
-load-offline.sh      在离线服务器导入并启动
+package-offline.sh   生成完整离线交付包
+load-offline.sh      从离线数据目录导入镜像并启动服务
 ```
 
 ## 快速用法
@@ -17,7 +17,14 @@ load-offline.sh      在离线服务器导入并启动
 ```bash
 bash scripts/build.sh
 bash scripts/package-offline.sh
-bash scripts/load-offline.sh /data
+bash scripts/load-offline.sh ../offline-data /data
+```
+
+离线交付包解压后，推荐使用外层安装入口：
+
+```bash
+bash install.sh
+bash install.sh /opt
 ```
 
 ## 相关文档

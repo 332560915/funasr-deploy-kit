@@ -8,8 +8,8 @@ Scripts locate the repository root from their own file path, so they do not depe
 
 ```text
 build.sh             Build images defined in Compose
-package-offline.sh   Package offline images and runtime data
-load-offline.sh      Import and start services on an offline server
+package-offline.sh   Create a complete offline delivery package
+load-offline.sh      Import images from offline data and start services
 ```
 
 ## Quick Usage
@@ -17,7 +17,14 @@ load-offline.sh      Import and start services on an offline server
 ```bash
 bash scripts/build.sh
 bash scripts/package-offline.sh
-bash scripts/load-offline.sh /data
+bash scripts/load-offline.sh ../offline-data /data
+```
+
+After extracting the offline delivery package, use the outer install entrypoint:
+
+```bash
+bash install.sh
+bash install.sh /opt
 ```
 
 ## Related Documentation
