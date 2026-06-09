@@ -99,7 +99,10 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
-	    jsonresult["is_final"] = false;
+      // The offline server sends one complete recognition result after the
+      // client marks the audio as finished. Mark only this offline response as
+      // final so official async clients can stop waiting.
+      jsonresult["is_final"] = true;
       if(stamp_res != ""){
         jsonresult["timestamp"] = stamp_res;
       }
@@ -131,7 +134,8 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = "";  // put result in 'text'
       jsonresult["mode"] = "offline";
-	    jsonresult["is_final"] = false;
+      // Empty offline responses are also terminal for this request.
+      jsonresult["is_final"] = true;
       jsonresult["wav_name"] = wav_name;
 
       // send the json to client

@@ -10,13 +10,13 @@ This project first copies the official `runtime/websocket/bin/websocket-server.c
 components/funasr-server/src/websocket-server.cpp
 ```
 
-The file currently keeps the official source baseline so the upstream version can be committed clearly. When adding compatibility for the official async client later, the final response location of this offline C++ websocket server will be changed explicitly:
+To add compatibility for the official async client, this project changes the final response location of this offline C++ websocket server explicitly:
 
 ```text
 jsonresult["is_final"] = false;
 ```
 
-planned change:
+changed to:
 
 ```text
 jsonresult["is_final"] = true;
@@ -30,4 +30,4 @@ local/funasr-runtime-sdk-cpu:0.4.7-is-final
 
 This project targets file transcription, so it uses offline mode first. Compared with low-latency streaming mode, offline mode is better suited for full-file recognition and matches the gateway API semantics of uploading a file and returning complete text.
 
-Note: the later change should target only the offline response of `funasr-wss-server`. If `online` or `2pass` support is added later, do not mark every response as `is_final=true`; final semantics must be handled per mode.
+Note: this change targets only the offline response of `funasr-wss-server`. If `online` or `2pass` support is added later, do not mark every response as `is_final=true`; final semantics must be handled per mode.

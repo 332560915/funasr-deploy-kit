@@ -10,7 +10,7 @@
 components/funasr-server/src/websocket-server.cpp
 ```
 
-当前文件保持官方源码基线，便于先通过 Git 提交记录固定上游版本。后续兼容官方异步客户端时，会在该文件中明确修改 offline server 的最终响应位置：
+兼容官方异步客户端时，本项目在该文件中明确修改 offline server 的最终响应位置：
 
 ```text
 jsonresult["is_final"] = false;
@@ -22,7 +22,7 @@ jsonresult["is_final"] = false;
 jsonresult["is_final"] = true;
 ```
 
-计划修改为：
+修改为：
 
 ```text
 jsonresult["is_final"] = true;
@@ -36,4 +36,4 @@ local/funasr-runtime-sdk-cpu:0.4.7-is-final
 
 本项目面向文件转写场景，因此优先使用 offline 模式。相比低延迟流式模式，offline 模式更适合完整文件识别，也更符合“上传文件后返回完整文本”的网关接口语义。
 
-注意：后续修改只应针对 `funasr-wss-server` 的 offline 响应。后续如果支持 `online` 或 `2pass`，不能把所有响应都设为 `is_final=true`，需要按对应模式重新处理 final 语义。
+注意：该修改只针对 `funasr-wss-server` 的 offline 响应。后续如果支持 `online` 或 `2pass`，不能把所有响应都设为 `is_final=true`，需要按对应模式重新处理 final 语义。
