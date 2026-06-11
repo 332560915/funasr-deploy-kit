@@ -1,0 +1,14 @@
+funasr-deploy-kit
+Copyright 2026 332560915
+
+This product includes software developed by 332560915.
+
+This project provides deployment utilities, service wrappers, scripts, and
+documentation for FunASR-based speech recognition services.
+
+This project includes modified source files derived from FunASR. The original
+FunASR copyright notices and MIT License notices are retained in those files.
+
+FunASR, model files, base container images, and third-party dependencies are
+governed by their respective upstream licenses. This NOTICE does not change
+the license terms of those upstream projects or artifacts.

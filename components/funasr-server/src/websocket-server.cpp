@@ -2,6 +2,14 @@
  * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
  * Reserved. MIT License  (https://opensource.org/licenses/MIT)
  */
+/**
+ * Modifications Copyright 2026 332560915.
+ *
+ * This file is derived from FunASR runtime/websocket/bin/websocket-server.cpp.
+ * The original FunASR copyright and MIT license notice above are retained.
+ * funasr-deploy-kit modifies the offline response handling so official async
+ * clients can receive a final result marker.
+ */
 /* 2022-2023 by zhaomingwork */
 
 // websocket server for asr engine

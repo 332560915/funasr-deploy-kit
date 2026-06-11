@@ -42,6 +42,14 @@ For more details, see:
 funasr-deploy-kit/docs/en/deployment/offline-deploy.md
 ```
 
+License and third-party notices:
+
+```text
+funasr-deploy-kit/LICENSE
+funasr-deploy-kit/NOTICE
+funasr-deploy-kit/THIRD_PARTY_NOTICES.md
+```
+
 Hotword configuration:
 
 ```text

@@ -54,3 +54,13 @@ Docker deployment kit for FunASR with HTTP API and offline delivery support.
 - [FunASR Server Component](components/funasr-server/README.en.md)
 - [Runtime README Template](deploy-template/README.en.md)
 - [Scripts](scripts/README.en.md)
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+When using, modifying, or redistributing this project, please retain the copyright notice, the license text, and the attribution information in the [NOTICE](NOTICE) file. If source files are modified, document those changes as required by Apache-2.0.
+
+FunASR, model files, Docker base images, and third-party dependencies are governed by their respective upstream licenses. This project's license does not change the original license terms of those upstream projects or artifacts.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for third-party component, model, and image licensing notes.

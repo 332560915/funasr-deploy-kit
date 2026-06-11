@@ -42,6 +42,14 @@ http://127.0.0.1:18000/docs
 funasr-deploy-kit/docs/zh/deployment/offline-deploy.md
 ```
 
+协议和第三方授权说明见：
+
+```text
+funasr-deploy-kit/LICENSE
+funasr-deploy-kit/NOTICE
+funasr-deploy-kit/THIRD_PARTY_NOTICES.md
+```
+
 热词配置：
 
 ```text

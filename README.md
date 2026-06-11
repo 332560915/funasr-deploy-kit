@@ -51,3 +51,13 @@
 - [FunASR Server 组件](components/funasr-server/README.md)
 - [部署后说明模板](deploy-template/README.md)
 - [脚本说明](scripts/README.md)
+
+## 开源协议
+
+本项目采用 [Apache License 2.0](LICENSE) 开源。
+
+使用、修改或再分发本项目时，请保留版权声明、许可证文本以及 [NOTICE](NOTICE) 文件中的署名信息。若修改了源码文件，请按 Apache-2.0 要求在相应文件或分发说明中标明修改情况。
+
+FunASR、模型文件、Docker 基础镜像以及第三方依赖遵循各自上游许可证。本项目的许可证不改变这些上游项目或制品的原始授权条款。
+
+第三方组件、模型和镜像的授权边界见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

@@ -43,6 +43,26 @@ runtime/config/hotwords.txt.template  热词格式参考
 
 `hotwords.txt` 只写真实热词数据行；`hotwords.txt.template` 是格式参考，可以包含注释。
 
+## 协议说明
+
+本项目采用 Apache License 2.0。协议、署名和第三方授权边界见项目资料：
+
+```text
+LICENSE
+NOTICE
+THIRD_PARTY_NOTICES.md
+```
+
+离线安装时，项目资料会保留在运行目录下的 `funasr-deploy-kit/` 子目录中，例如：
+
+```text
+/data/funasr/funasr-deploy-kit/LICENSE
+/data/funasr/funasr-deploy-kit/NOTICE
+/data/funasr/funasr-deploy-kit/THIRD_PARTY_NOTICES.md
+```
+
+在线部署生成的最小运行目录不复制完整项目资料，需要查看协议时可访问项目首页。
+
 ## 完整技术支持
 
 完整部署、配置、离线迁移和问题排查说明，请查看项目文档：

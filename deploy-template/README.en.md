@@ -43,6 +43,26 @@ runtime/config/hotwords.txt.template  Hotword format reference
 
 `hotwords.txt` should contain only actual hotword data lines. `hotwords.txt.template` is a reference file and may contain comments.
 
+## License Notes
+
+This project is licensed under Apache License 2.0. License, attribution, and third-party notices are documented in the project reference files:
+
+```text
+LICENSE
+NOTICE
+THIRD_PARTY_NOTICES.md
+```
+
+For offline installation, the project reference files are kept under the `funasr-deploy-kit/` subdirectory of the runtime directory, for example:
+
+```text
+/data/funasr/funasr-deploy-kit/LICENSE
+/data/funasr/funasr-deploy-kit/NOTICE
+/data/funasr/funasr-deploy-kit/THIRD_PARTY_NOTICES.md
+```
+
+Online deployment creates a minimal runtime directory and does not copy the full project reference files. Use the project home page when license files are needed.
+
 ## Full Technical Support
 
 For deployment, configuration, offline migration, and troubleshooting, see:
